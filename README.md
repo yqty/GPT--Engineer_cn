@@ -7,7 +7,10 @@
 
 稳定版本使用方法:
 
-pip install gpt-engineer pip install -e . export OPENAI_API_KEY=[your api key] gpt-engineer projects/你自己的项目目录
+"pip install gpt-engineer "
+"pip install -e . "
+"export OPENAI_API_KEY=[your api key] "
+"gpt-engineer projects/你自己的项目目录"
 =======
 
 
