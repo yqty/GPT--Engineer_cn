@@ -14,32 +14,24 @@ from gpt_engineer.learning import human_input
 
 
 def setup_sys_prompt(dbs: DBs) -> str:
-    return (
-        dbs.preprompts["generate"] + "\nUseful to know:\n" + dbs.preprompts["philosophy"]
-    )
+    return dbs.preprompts["generate"] + "\n有用的信息:\n" + dbs.preprompts["philosophy"]
 
 
 def get_prompt(dbs: DBs) -> str:
-    """While we migrate we have this fallback getter"""
-    assert (
-        "prompt" in dbs.input or "main_prompt" in dbs.input
-    ), "Please put your prompt in the file `prompt` in the project directory"
+    """迁移期间，我们使用此备用的获取器"""
+    assert "prompt" in dbs.input or "main_prompt" in dbs.input, "请将您的提示放在项目目录中的prompt文件中"
 
     if "prompt" not in dbs.input:
-        print(
-            colored("Please put the prompt in the file `prompt`, not `main_prompt", "red")
-        )
+        print(colored("请将提示放在`prompt`文件中，而不是`main_prompt`", "red"))
         print()
         return dbs.input["main_prompt"]
 
     return dbs.input["prompt"]
 
 
-# All steps below have the signature Step
-
-
+# 以下所有步骤的签名均为Step
 def simple_gen(ai: AI, dbs: DBs) -> List[dict]:
-    """Run the AI on the main prompt and save the results"""
+    """在主提示上运行AI并保存结果"""
     messages = ai.start(setup_sys_prompt(dbs), get_prompt(dbs))
     to_files(messages[-1]["content"], dbs.workspace)
     return messages
@@ -47,40 +39,40 @@ def simple_gen(ai: AI, dbs: DBs) -> List[dict]:
 
 def clarify(ai: AI, dbs: DBs) -> List[dict]:
     """
-    Ask the user if they want to clarify anything and save the results to the workspace
+    询问用户是否需要澄清任何内容，并将结果保存到工作区
     """
     messages = [ai.fsystem(dbs.preprompts["qa"])]
     user_input = get_prompt(dbs)
     while True:
         messages = ai.next(messages, user_input)
 
-        if messages[-1]["content"].strip() == "Nothing more to clarify.":
+        if messages[-1]["content"].strip() == "没有更多要澄清的内容。":
             break
 
         if messages[-1]["content"].strip().lower().startswith("no"):
-            print("Nothing more to clarify.")
+            print("没有更多要澄清的内容。")
             break
 
         print()
-        user_input = input('(answer in text, or "c" to move on)\n')
+        user_input = input("(回答文本中的问题，或者选择“c”继续)\n")
         print()
 
         if not user_input or user_input == "c":
-            print("(letting gpt-engineer make its own assumptions)")
+            print("(让gpt-engineer自己做出假设)")
             print()
             messages = ai.next(
                 messages,
-                "Make your own assumptions and state them explicitly before starting",
+                "在开始之前，请自行做出假设并明确说明它们",
             )
             print()
             return messages
 
         user_input += (
             "\n\n"
-            "Is anything else unclear? If yes, only answer in the form:\n"
-            "{remaining unclear areas} remaining questions.\n"
-            "{Next question}\n"
-            'If everything is sufficiently clear, only answer "Nothing more to clarify.".'
+            "还有其他不清楚的地方吗？如果是，请仅以以下形式回答：\n"
+            "{剩余的不清楚的问题} 剩余的问题。\n"
+            "{下一个问题}\n"
+            "如果一切都足够清楚，请仅回答“没有更多要澄清的内容”。"
         )
 
     print()
@@ -89,12 +81,11 @@ def clarify(ai: AI, dbs: DBs) -> List[dict]:
 
 def gen_spec(ai: AI, dbs: DBs) -> List[dict]:
     """
-    Generate a spec from the main prompt + clarifications and save the results to
-    the workspace
+    根据主提示+澄清生成规范，并将结果保存到工作区
     """
     messages = [
         ai.fsystem(setup_sys_prompt(dbs)),
-        ai.fsystem(f"Instructions: {dbs.input['prompt']}"),
+        ai.fsystem(f"说明：{dbs.input['prompt']}"),
     ]
 
     messages = ai.next(messages, dbs.preprompts["spec"])
@@ -105,20 +96,13 @@ def gen_spec(ai: AI, dbs: DBs) -> List[dict]:
 
 
 def respec(ai: AI, dbs: DBs) -> List[dict]:
-    messages = json.loads(dbs.logs[gen_spec.__name__])
+    messages = json.loads(dbs.logs[gen_spec.name])
     messages += [ai.fsystem(dbs.preprompts["respec"])]
 
     messages = ai.next(messages)
     messages = ai.next(
         messages,
-        (
-            "Based on the conversation so far, please reiterate the specification for "
-            "the program. "
-            "If there are things that can be improved, please incorporate the "
-            "improvements. "
-            "If you are satisfied with the specification, just write out the "
-            "specification word by word again."
-        ),
+        ("根据目前的对话，请重新阐述程序的规范。" "如果有可以改进的地方，请加以改进。" "如果您对规范满意，请将规范逐字逐句地再次写出。"),
     )
 
     dbs.memory["specification"] = messages[-1]["content"]
@@ -127,12 +111,12 @@ def respec(ai: AI, dbs: DBs) -> List[dict]:
 
 def gen_unit_tests(ai: AI, dbs: DBs) -> List[dict]:
     """
-    Generate unit tests based on the specification, that should work.
+    #根据规范生成应该有效的单元测试。
     """
     messages = [
         ai.fsystem(setup_sys_prompt(dbs)),
-        ai.fuser(f"Instructions: {dbs.input['prompt']}"),
-        ai.fuser(f"Specification:\n\n{dbs.memory['specification']}"),
+        ai.fuser(f"说明：{dbs.input['prompt']}"),
+        ai.fuser(f"规范：\n\n{dbs.memory['specification']}"),
     ]
 
     messages = ai.next(messages, dbs.preprompts["unit_tests"])
@@ -144,7 +128,7 @@ def gen_unit_tests(ai: AI, dbs: DBs) -> List[dict]:
 
 
 def gen_clarified_code(ai: AI, dbs: DBs) -> List[dict]:
-    """Takes clarification and generates code"""
+    """获取澄清并生成代码"""
 
     messages = json.loads(dbs.logs[clarify.__name__])
 
@@ -158,13 +142,13 @@ def gen_clarified_code(ai: AI, dbs: DBs) -> List[dict]:
 
 
 def gen_code(ai: AI, dbs: DBs) -> List[dict]:
-    # get the messages from previous step
+    # 获取前一步的消息
 
     messages = [
         ai.fsystem(setup_sys_prompt(dbs)),
-        ai.fuser(f"Instructions: {dbs.input['prompt']}"),
-        ai.fuser(f"Specification:\n\n{dbs.memory['specification']}"),
-        ai.fuser(f"Unit tests:\n\n{dbs.memory['unit_tests']}"),
+        ai.fuser(f"说明：{dbs.input['prompt']}"),
+        ai.fuser(f"规范：\n\n{dbs.memory['specification']}"),
+        ai.fuser(f"单元测试：\n\n{dbs.memory['unit_tests']}"),
     ]
     messages = ai.next(messages, dbs.preprompts["use_qa"])
     to_files(messages[-1]["content"], dbs.workspace)
@@ -174,26 +158,25 @@ def gen_code(ai: AI, dbs: DBs) -> List[dict]:
 def execute_entrypoint(ai: AI, dbs: DBs) -> List[dict]:
     command = dbs.workspace["run.sh"]
 
-    print("Do you want to execute this code?")
+    print("您是否要执行此代码？")
     print()
     print(command)
     print()
-    print('If yes, press enter. Otherwise, type "no"')
+    print('如果是，请按回车键。否则，输入"no"')
     print()
     if input() not in ["", "y", "yes"]:
-        print("Ok, not executing the code.")
+        print("好的，不执行代码。")
         return []
-    print("Executing the code...")
+    print("正在执行代码...")
     print()
     print(
         colored(
-            "Note: If it does not work as expected, consider running the code"
-            + " in another way than above.",
+            "注意：如果代码的执行结果与预期不符，请考虑以其他方式运行代码，而不是上述方式。",
             "green",
         )
     )
     print()
-    print("You can press ctrl+c *once* to stop the execution.")
+    print("您可以按ctrl+c *一次*来停止执行。")
     print()
 
     p = subprocess.Popen("bash run.sh", shell=True, cwd=dbs.workspace.path)
@@ -201,8 +184,8 @@ def execute_entrypoint(ai: AI, dbs: DBs) -> List[dict]:
         p.wait()
     except KeyboardInterrupt:
         print()
-        print("Stopping execution.")
-        print("Execution stopped.")
+        print("停止执行。")
+        print("执行已停止。")
         p.kill()
         print()
 
@@ -212,18 +195,16 @@ def execute_entrypoint(ai: AI, dbs: DBs) -> List[dict]:
 def gen_entrypoint(ai: AI, dbs: DBs) -> List[dict]:
     messages = ai.start(
         system=(
-            "You will get information about a codebase that is currently on disk in "
-            "the current folder.\n"
-            "From this you will answer with code blocks that includes all the necessary "
-            "unix terminal commands to "
-            "a) install dependencies "
-            "b) run all necessary parts of the codebase (in parallel if necessary).\n"
-            "Do not install globally. Do not use sudo.\n"
-            "Do not explain the code, just give the commands.\n"
-            "Do not use placeholders, use example values (like . for a folder argument) "
-            "if necessary.\n"
+            "您将获得当前文件夹中当前磁盘上的代码库的信息。\n"
+            "您需要用包含所有必要的Unix终端命令的代码块回答，"
+            "这些命令包括："
+            "a）安装依赖项"
+            "b）运行代码库的所有必要部分（如果有必要，可以并行运行）。\n"
+            "不要进行全局安装。不要使用sudo。\n"
+            "不要解释代码，只需给出命令。\n"
+            "不要使用占位符，如果有必要，请使用示例值（例如.表示文件夹参数）。\n"
         ),
-        user="Information about the codebase:\n\n" + dbs.workspace["all_output.txt"],
+        user="代码库的信息：\n\n" + dbs.workspace["all_output.txt"],
     )
     print()
 
@@ -236,7 +217,7 @@ def gen_entrypoint(ai: AI, dbs: DBs) -> List[dict]:
 def use_feedback(ai: AI, dbs: DBs):
     messages = [
         ai.fsystem(setup_sys_prompt(dbs)),
-        ai.fuser(f"Instructions: {dbs.input['prompt']}"),
+        ai.fuser(f"说明：{dbs.input['prompt']}"),
         ai.fassistant(dbs.workspace["all_output.txt"]),
         ai.fsystem(dbs.preprompts["use_feedback"]),
     ]
@@ -246,14 +227,14 @@ def use_feedback(ai: AI, dbs: DBs):
 
 
 def fix_code(ai: AI, dbs: DBs):
-    code_output = json.loads(dbs.logs[gen_code.__name__])[-1]["content"]
+    code_output = json.loads(dbs.logs[gen_code.name])[-1]["content"]
     messages = [
         ai.fsystem(setup_sys_prompt(dbs)),
-        ai.fuser(f"Instructions: {dbs.input['prompt']}"),
+        ai.fuser(f"说明：{dbs.input['prompt']}"),
         ai.fuser(code_output),
         ai.fsystem(dbs.preprompts["fix_code"]),
     ]
-    messages = ai.next(messages, "Please fix any errors in the code above.")
+    messages = ai.next(messages, "请修复上面代码中的任何错误。")
     to_files(messages[-1]["content"], dbs.workspace)
     return messages
 
@@ -277,7 +258,7 @@ class Config(str, Enum):
     USE_FEEDBACK = "use_feedback"
 
 
-# Different configs of what steps to run
+# 不同的配置决定要运行的步骤
 STEPS = {
     Config.DEFAULT: [
         clarify,
@@ -322,11 +303,12 @@ STEPS = {
         execute_entrypoint,
         human_review,
     ],
-    Config.USE_FEEDBACK: [use_feedback, gen_entrypoint, execute_entrypoint, human_review],
+    Config.USE_FEEDBACK: [
+        use_feedback,
+        gen_entrypoint,
+        execute_entrypoint,
+        human_review,
+    ],
     Config.EXECUTE_ONLY: [execute_entrypoint],
     Config.EVALUATE: [execute_entrypoint, human_review],
 }
-
-# Future steps that can be added:
-# run_tests_and_fix_files
-# execute_entrypoint_and_fix_files_if_it_results_in_error

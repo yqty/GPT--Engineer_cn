@@ -1,21 +1,43 @@
-Please now remember the steps:
+现在请记住步骤:
 
-Think step by step and reason yourself to the right decisions to make sure we get it right.
-First lay out the names of the core classes, functions, methods that will be necessary, As well as a quick comment on their purpose.
 
-Then you will output the content of each file including ALL code.
-Each file must strictly follow a markdown code block format, where the following tokens must be replaced such that
-FILENAME is the lowercase file name including the file extension,
-LANG is the markup code block language for the code's language, and CODE is the code:
 
-FILENAME
-```LANG
-CODE
-```
+一步一步地思考，让自己做出正确的决定，以确保我们做对了。
 
-Please note that the code should be fully functional. No placeholders.
+首先列出必要的核心类、函数和方法的名称，以及对其目的的快速注释。
 
-You will start with the "entrypoint" file, then go to the ones that are imported by that file, and so on.
-Follow a language and framework appropriate best practice file naming convention.
-Make sure that files contain all imports, types etc. The code should be fully functional. Make sure that code in different files are compatible with each other.
-Before you finish, double check that all parts of the architecture is present in the files.
+
+
+然后，您将输出每个文件的内容，包括所有代码。
+
+每个文件必须严格遵循标记代码块格式，其中必须替换以下令牌，以便
+
+FILENAME是包含文件扩展名的小写文件名，
+
+LANG是代码语言的标记代码块语言，code是代码:
+
+
+
+文件名
+
+”“朗
+
+代码
+
+' ' '
+
+
+
+请注意，代码应该具有完整的功能。没有占位符。
+
+
+
+您将从“entrypoint”文件开始，然后转到由该文件导入的文件，依此类推。
+
+遵循语言和框架适当的最佳实践文件命名约定。
+
+确保文件包含所有的导入，类型等。代码应该具有完整的功能。确保不同文件中的代码彼此兼容。
+
+在完成之前，仔细检查架构的所有部分是否都存在于文件中。
+
+ 

@@ -17,28 +17,28 @@ from gpt_engineer.domain import Step
 @dataclass_json
 @dataclass
 class Review:
-    ran: Optional[bool]
-    perfect: Optional[bool]
-    works: Optional[bool]
-    comments: str
-    raw: str
+    ran: Optional[bool]  # 代码是否运行
+    perfect: Optional[bool]  # 代码是否完美
+    works: Optional[bool]  # 代码是否有用
+    comments: str  # 评论
+    raw: str  # 原始评论
 
 
 @dataclass_json
 @dataclass
 class Learning:
-    model: str
-    temperature: float
-    steps: str
-    steps_file_hash: str
-    prompt: str
-    logs: str
-    workspace: str
-    feedback: Optional[str]
-    session: str
-    review: Optional[Review]
-    timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
-    version: str = "0.3"
+    model: str  # 模型
+    temperature: float  # 温度
+    steps: str  # 步骤
+    steps_file_hash: str  # 步骤文件哈希值
+    prompt: str  # 提示
+    logs: str  # 日志
+    workspace: str  # 工作空间
+    feedback: Optional[str]  # 反馈
+    session: str  # 会话
+    review: Optional[Review]  # 评论
+    timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())  # 时间戳
+    version: str = "0.3"  # 版本号
 
 
 TERM_CHOICES = (
@@ -47,43 +47,36 @@ TERM_CHOICES = (
     + colored("n", "red")
     + "/"
     + colored("u", "yellow")
-    + "(ncertain): "
+    + "(不确定): "
 )
 
 
 def human_input() -> Review:
     print()
-    print(
-        colored("To help gpt-engineer learn, please answer 3 questions:", "light_green")
-    )
+    print(colored("为了帮助gpt-engineer学习，请回答以下3个问题:", "light_green"))
     print()
 
-    ran = input("Did the generated code run at all? " + TERM_CHOICES)
+    ran = input("生成的代码是否运行？" + TERM_CHOICES)
     while ran not in ("y", "n", "u"):
-        ran = input("Invalid input. Please enter y, n, or u: ")
+        ran = input("无效的输入，请输入y、n或u: ")
 
     perfect = ""
     useful = ""
 
     if ran == "y":
-        perfect = input(
-            "Did the generated code do everything you wanted? " + TERM_CHOICES
-        )
+        perfect = input("生成的代码是否完美？" + TERM_CHOICES)
         while perfect not in ("y", "n", "u"):
-            perfect = input("Invalid input. Please enter y, n, or u: ")
+            perfect = input("无效的输入，请输入y、n或u: ")
 
         if perfect != "y":
-            useful = input("Did the generated code do anything useful? " + TERM_CHOICES)
+            useful = input("生成的代码是否有用？" + TERM_CHOICES)
             while useful not in ("y", "n", "u"):
-                useful = input("Invalid input. Please enter y, n, or u: ")
+                useful = input("无效的输入，请输入y、n或u: ")
 
     comments = ""
     if perfect != "y":
-        comments = input(
-            "If you have time, please explain what was not working "
-            + colored("(ok to leave blank)\n", "light_green")
-        )
-    print(colored("Thank you", "light_green"))
+        comments = input("如果有时间，请解释哪些部分不起作用 " + colored("(可以留空)\n", "light_green"))
+    print(colored("谢谢", "light_green"))
     return Review(
         raw=", ".join([ran, perfect, useful]),
         ran={"y": True, "n": False, "u": None, "": None}[ran],
@@ -136,7 +129,7 @@ def get_session():
         if path.exists():
             user_id = path.read_text()
         else:
-            # random uuid:
+            # 随机生成的UUID:
             user_id = str(random.randint(0, 2**32))
             path.write_text(user_id)
         return user_id

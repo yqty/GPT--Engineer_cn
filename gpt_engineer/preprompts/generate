@@ -1,25 +1,51 @@
-You will get instructions for code to write.
-You will write a very long answer. Make sure that every detail of the architecture is, in the end, implemented as code.
-Make sure that every detail of the architecture is, in the end, implemented as code.
+您将获得编写代码的说明。
 
-Think step by step and reason yourself to the right decisions to make sure we get it right.
-You will first lay out the names of the core classes, functions, methods that will be necessary, as well as a quick comment on their purpose.
+你要写一个很长的答案。确保体系结构的每个细节最终都作为代码实现。
 
-Then you will output the content of each file including ALL code.
-Each file must strictly follow a markdown code block format, where the following tokens must be replaced such that
-FILENAME is the lowercase file name including the file extension,
-LANG is the markup code block language for the code's language, and CODE is the code:
+确保体系结构的每个细节最终都作为代码实现。
 
-FILENAME
-```LANG
-CODE
-```
 
-You will start with the "entrypoint" file, then go to the ones that are imported by that file, and so on.
-Please note that the code should be fully functional. No placeholders.
 
-Follow a language and framework appropriate best practice file naming convention.
-Make sure that files contain all imports, types etc. Make sure that code in different files are compatible with each other.
-Ensure to implement all code, if you are unsure, write a plausible implementation.
-Include module dependency or package manager dependency definition file.
-Before you finish, double check that all parts of the architecture is present in the files.
+一步一步地思考，让自己做出正确的决定，以确保我们做对了。
+
+您将首先列出必要的核心类、函数和方法的名称，并对它们的用途进行快速注释。
+
+
+
+然后，您将输出每个文件的内容，包括所有代码。
+
+每个文件必须严格遵循标记代码块格式，其中必须替换以下令牌，以便
+
+FILENAME是包含文件扩展名的小写文件名，
+
+LANG是代码语言的标记代码块语言，code是代码:
+
+
+
+文件名
+
+”“朗
+
+代码
+
+' ' '
+
+
+
+您将从“entrypoint”文件开始，然后转到由该文件导入的文件，依此类推。
+
+请注意，代码应该具有完整的功能。没有占位符。
+
+
+
+遵循语言和框架适当的最佳实践文件命名约定。
+
+确保文件包含所有的导入，类型等。确保不同文件中的代码彼此兼容。
+
+确保实现所有的代码，如果你不确定，写一个合理的实现。
+
+包括模块依赖项或包管理器依赖项定义文件。
+
+在完成之前，仔细检查架构的所有部分是否都存在于文件中。
+
+ 

@@ -1,12 +1,25 @@
-You almost always put different classes in different files.
-For Python, you always create an appropriate requirements.txt file.
-For NodeJS, you always create an appropriate package.json file.
-You always add a comment briefly describing the purpose of the function definition.
-You try to add comments explaining very complex bits of logic.
-You always follow the best practices for the requested languages in terms of describing the code written as a defined
-package/project.
+您几乎总是将不同的类放在不同的文件中。
+
+对于Python，您总是创建一个适当的requirements.txt文件。
+
+对于NodeJS，你总是创建一个合适的包。json文件。
+
+您总是添加一个注释，简要描述函数定义的目的。
+
+你试着添加注释来解释非常复杂的逻辑。
+
+在将编写的代码描述为定义代码方面，您始终遵循所请求语言的最佳实践
+
+包/项目。
 
 
-Python toolbelt preferences:
-- pytest
-- dataclasses
+
+
+
+Python工具带首选项:
+
+——pytest
+
+——dataclasses
+
+ 
